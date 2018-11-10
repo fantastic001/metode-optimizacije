@@ -120,6 +120,8 @@ def step(X, P):
     pos = path[::2]
     q = min(X[i,j] for i,j in neg)
     print("Heuristic: %f" % q)
+    if q == 0: 
+        raise StopIteration
     for i,j in neg:
         X[i,j] -= q
     for i,j in pos:
