@@ -66,20 +66,19 @@ def  uv_method(sources, demands, X, C):
     r,c = np.nonzero(X)
     if len(sources) + len(demands) - 1 != len(r):
         # degenerate case 
-        dummy = [] 
         # finding N - (n+m-1) epsilon variables
-        while len(dummy) + len(r) != len(sources) + len(demands) - 1:
+        diff = len(sources) + len(demands) - 1 - len(r)
+        for k in range(diff):
             # add variable where we have found path and is not in dummmy
-            old_length = len(dummy)
             for i in range(len(sources)):
                 for j in range(len(demands)):
+                    print("Loop found:")
+                    print(get_loop(X,i,j))
                     if X[i,j] == 0 and get_loop(X, i,j) is not None:
-                        dummy.append((i,j))
-                        X[i,j] = 10**(-5) # assign very small value
-            if len(dummy) == old_length:
-                raise StopIteration("Cannot find anything bettter")
+                        X[i,j] = 0.00001 # assign very small value
     u = [np.nan for s in sources]
     v = [np.nan for d in demands]
+    r,c = np.nonzero(X) # we have changed X maybe, we are updating list of nonzero values 
     u[0] = 0 
     #print(X)
     while [x for x in u if np.isnan(x)] + [x for x in v if np.isnan(x)] != []:
@@ -90,7 +89,7 @@ def  uv_method(sources, demands, X, C):
             if np.isnan(v[j]):
                 if not np.isnan(u[i]):
                     v[j] = C[i,j] - u[i]
-            #print(u + v)
+            print(u + v)
     print("u: ", u)
     print("v: ", v)
     U = C*0
@@ -115,12 +114,14 @@ def step(X, P):
     print("Loop: ", path)
     path = path[:-1]
     if path is None:
+        print("Loop is not found")
         raise StopIteration()
     neg = path[1::2]
     pos = path[::2]
     q = min(X[i,j] for i,j in neg)
     print("Heuristic: %f" % q)
     if q == 0: 
+        print("q is zero")
         raise StopIteration
     for i,j in neg:
         X[i,j] -= q
